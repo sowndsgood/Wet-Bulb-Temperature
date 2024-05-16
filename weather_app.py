@@ -42,6 +42,10 @@ def calculate_wet_bulb_temperature(temperature, humidity):
     WBT = term1 + term2 - term3 + term4 + constant_term
     return WBT
 
+def get_current_time(timezone='UTC'):
+    current_time = datetime.now(timezone)
+    return current_time.strftime("%Y-%m-%d %H:%M:%S")
+
 # Create Streamlit app
 def main():
     st.title('Wet Bulb Temperature for Coastal Cities in India')
@@ -56,12 +60,16 @@ def main():
 
     # Get current date and time
     current_date = datetime.now().strftime("%Y-%m-%d")
-    current_time = datetime.now().strftime("%H:%M:%S")
+    
 
-   
     st.sidebar.markdown("# Current Date and Time")
+    current_time = get_current_time()
     st.sidebar.markdown(f"**Date:** {current_date}")
-    st.sidebar.markdown(f"**Time:** {current_time}")
+    st.sidebar.write(f"**Current Time:** {current_time}")
+   
+    
+    
+    
     
     # List of coastal cities in India
     cities = [
