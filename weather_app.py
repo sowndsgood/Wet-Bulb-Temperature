@@ -52,7 +52,7 @@ def main():
     """)
 
     # Data source
-    st.markdown("<span style='color:yellow;'>**Data Source**: OpenWeatherMap API</span>", unsafe_allow_html=True)
+    st.markdown("<span style='color:orange;'>**Data Source**: OpenWeatherMap API</span>", unsafe_allow_html=True)
 
     # Get current date and time
     current_date = datetime.now().strftime("%Y-%m-%d")
