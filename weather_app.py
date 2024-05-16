@@ -61,13 +61,13 @@ def main():
     st.markdown("<span style='color:orange;'>**Data Source**: OpenWeatherMap API</span>", unsafe_allow_html=True)
 
     # Get current date and time
-    current_date = datetime.now().strftime("%Y-%m-%d")
+    
     
 
     st.sidebar.markdown("# Current Date and Time")
     current_time = get_current_time()
-    st.sidebar.markdown(f"**Date:** {current_date}")
-    st.sidebar.write(f"**Current Time:** {current_time}")
+    
+    st.sidebar.write(f"{current_time}")
    
     
     
