@@ -123,12 +123,6 @@ def main():
     plot_map(cities) 
     
     
-    # User feedback section
-    st.write("### User Feedback")
-    feedback = st.text_area("Leave your feedback here:")
-    if st.button("Submit Feedback"):
-        save_feedback(feedback)
-        st.write(" ### Thank you for your feedback!")
 
 def plot_map(cities):
     weather_data = {}
@@ -217,22 +211,6 @@ def get_coordinates(city):
     return coordinates[city]
 
 
-def save_feedback(feedback):
-    feedback_data = {
-        "date": [datetime.now().strftime("%Y-%m-%d")],
-        "time": [datetime.now().strftime("%H:%M:%S")],
-        "feedback": [feedback]
-    }
-    feedback_df = pd.DataFrame(feedback_data)
-    file_path = "feedback.csv"
-
-    # Check if the file exists
-    if os.path.isfile(file_path):
-        # Append the new feedback to the existing CSV
-        feedback_df.to_csv(file_path, mode='a', header=False, index=False)
-    else:
-        # Create a new CSV file and write the feedback
-        feedback_df.to_csv(file_path, index=False)
 
 # Run the app
 if __name__ == "__main__":
