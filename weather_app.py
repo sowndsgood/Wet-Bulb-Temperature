@@ -11,6 +11,7 @@ import os
 import folium
 from streamlit_folium import folium_static
 from PIL import Image
+import pytz  # Add this import for timezone support
 
 def get_weather_data(city):
     api_key = '71aa83b817d6fff071b7d63b02843f66'
@@ -42,8 +43,9 @@ def calculate_wet_bulb_temperature(temperature, humidity):
     WBT = term1 + term2 - term3 + term4 + constant_term
     return WBT
 
-def get_current_time(timezone='UTC'):
-    current_time = datetime.now(timezone)
+def get_current_time(timezone_str='Asia/Kolkata'):
+    tz = pytz.timezone(timezone_str)
+    current_time = datetime.now(tz)
     return current_time.strftime("%Y-%m-%d %H:%M:%S")
 
 # Create Streamlit app
