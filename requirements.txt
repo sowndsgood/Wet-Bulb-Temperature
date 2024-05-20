@@ -91,6 +91,7 @@ pandocfilters==1.5.1
 parso==0.8.3
 pillow==10.2.0
 platformdirs==4.2.0
+plotly==5.3.1
 prometheus_client==0.20.0
 prompt-toolkit==3.0.43
 protobuf==4.25.3
