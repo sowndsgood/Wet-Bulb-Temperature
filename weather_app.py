@@ -12,12 +12,13 @@ import folium
 from streamlit_folium import folium_static
 from PIL import Image
 import pytz  # Add this import for timezone support
+import plotly.express as px
 
 def get_weather_data(city):
     api_key = '71aa83b817d6fff071b7d63b02843f66'
     url = f'http://api.openweathermap.org/data/2.5/weather?q={city},IN&appid={api_key}&units=metric'
     response = requests.get(url)
-    data = response.json()
+    data= response.json()
     try:
         temperature = data['main']['temp']
         humidity = data['main']['humidity']
@@ -56,12 +57,12 @@ def main():
     st.title('Wet Bulb Temperature for Coastal Cities in India')
     st.markdown("""
     Welcome to the Wet Bulb Temperature Monitoring App. This tool helps you monitor the wet bulb temperatures in various coastal cities in India.
-    Select a city from the dropdown menu to see the current temperature, humidity, and wet bulb temperature. The wet bulb temperature is an important metric to understand heat stress.
+    Select a city from the dropdown menu to see the current temperature, humidity, and wet bulb temperature.You can also visualize the Wet Bulb Temperature (WBT) data for different cities and years. The wet bulb temperature is an important metric to understand heat stress. 
     If the wet bulb temperature exceeds 30°C (86°F), it can pose serious health risks.
     """)
 
     # Data source
-    st.markdown("<span style='color:orange;'>**Data Source**: OpenWeatherMap API</span>", unsafe_allow_html=True)
+    st.markdown("**Data Source:**<span style='color:orange;'> OpenWeatherMap API</span> for current data and <span style='color:orange;'>Iowa State University</span> for historical data", unsafe_allow_html=True)
 
     # Get current date and time
     
@@ -75,17 +76,17 @@ def main():
     st.sidebar.title("About")
 
     # Description of the app with color
-    st.sidebar.markdown("""This app provides real-time weather information, including temperature, humidity, and wet bulb temperature, for coastal cities in India.
+    st.sidebar.markdown("""This web application provides real-time weather information, including temperature, humidity, and wet bulb temperature, for coastal cities in India. Users can visualize the Wet Bulb Temperature (WBT) data for different cities and years.
     """)
 
     # Data source with color
     st.sidebar.markdown("""
-    <span style='color: #008000;'>Data Source:</span> OpenWeatherMap API
+    <span style='color: #008000;'>Data Source:</span> OpenWeatherMap API and Iowa State University
     """, unsafe_allow_html=True)
 
     # Developer information with color
     st.sidebar.markdown("""
-    <span style='color: #FFA500;'>Developed by:</span> Sowndarya S
+    <span style='color:red;'>Developed by:</span> Sowndarya S
     """, unsafe_allow_html=True)
 
     # Acknowledgments with color
@@ -146,6 +147,75 @@ def main():
     st.write("### Plot of Wet Bulb Temperature of coastal cities:")
 
     plot_map(cities) 
+
+
+    # Load the temperature data, converting "M" to NaN
+    temp_df = pd.read_csv('temp.csv', na_values='M')
+
+    # Load the humidity data, converting "M" to NaN
+    humid_df = pd.read_csv('humid.csv', na_values='M')
+
+    # Rename 'relh' to 'humidity' to match the calculation function
+    humid_df.rename(columns={'relh': 'humidity'}, inplace=True)
+
+    # Handling NaN values - example: dropping rows with NaNs
+    temp_df.dropna(inplace=True)
+    humid_df.dropna(inplace=True)
+
+    # Merge the dataframes on 'station' and 'valid' columns
+    combined_df = pd.merge(temp_df, humid_df, on=['station', 'valid'])
+
+
+    # Calculate the Wet Bulb Temperature for each row
+    combined_df['WBT_C'] = combined_df.apply(lambda row: calculate_wet_bulb_temperature(row['tmpc'], row['humidity']), axis=1)
+
+    # Save the combined DataFrame with WBT to a new CSV file
+    combined_df.to_csv('combined_with_wbt.csv', index=False)
+
+    # Load the combined data
+    df = pd.read_csv('combined_with_wbt.csv')
+
+    # Mapping station codes to station names
+    station_names = {
+    'VECC': 'Calcutta',
+    'VABB': 'Mumbai',
+    'VASU': 'Surat',
+    'VOCI': 'Cochin',
+    'VOGO': 'Goa',
+    'VOMM': 'Madras',
+    'VOVZ': 'Vishakhapatnam',
+    'VOTV': 'Trivandrum'
+    }
+
+    # Add a column with station names
+    df['station_name'] = df['station'].map(station_names)
+
+    # Streamlit app
+    st.header(" Wet Bulb Temperature Visualization")
+
+    # Main area for filters
+    st.write("##### Filters")
+
+    # City selection
+    cities = df['station_name'].unique()
+    selected_city = st.selectbox('Select City', cities)
+
+    # Year selection
+    df['year'] = pd.to_datetime(df['valid']).dt.year
+    years = df['year'].unique()
+    selected_year = st.selectbox('Select Year', years)
+
+    # Filter data based on selections
+    filtered_df = df[(df['station_name'] == selected_city) & (df['year'] == selected_year)]
+
+    # Plotting
+    
+    fig = px.line(filtered_df, x='valid', y='WBT_C', title=f'Wet Bulb Temperature in {selected_city} for {selected_year}')
+    fig.update_layout(xaxis_title='Date', yaxis_title='Wet Bulb Temperature (C)')
+    st.plotly_chart(fig)
+
+
+
     
     # Add interactive FAQ section below the main content
     st.write("""
